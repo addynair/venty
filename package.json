@@ -5,7 +5,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-  "start": "node index.js",
+  "start": "node index.mjs",
   "dev": "concurrently \"npm run server\" \"npm run client\"",
   "client": "cd client && npm start",
   "server": "cd server && node index.mjs"
