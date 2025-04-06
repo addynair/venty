@@ -5,9 +5,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node server/index.mjs",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "dev": "concurrently \"npm run server\" \"npm run client\"",
+  "client": "cd client && npm start",
+  "server": "cd server && node index.mjs"
+},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/addynair/mood-analyzer-ai.git"
@@ -25,5 +26,8 @@
     "dotenv": "^16.4.7",
     "express": "^5.1.0",
     "langchain": "^0.3.20"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
   }
 }

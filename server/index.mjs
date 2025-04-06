@@ -1,21 +1,18 @@
 import dotenv from "dotenv";
-dotenv.config();
+dotenv.config({ path: './.env' }); 
 
 import express from "express";
-import bodyParser from "body-parser";
-import analyzeRoute from "../routes/analyze.mjs";
+import analyzeRoute from "./routes/analyze.mjs"; 
+import cors from "cors";
 
 const app = express();
-const port = 3000;
+const PORT = 5000;
 
-app.use(bodyParser.json());
+app.use(cors());
+app.use(express.json()); 
 
-app.get("/", (req, res) => {
-  res.send("Server is up and running!");
-});
+app.use("/analyze", analyzeRoute); 
 
-app.use("/analyze", analyzeRoute);
-
-app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
+app.listen(PORT, () => {
+  console.log(`🚀 Server is running on http://localhost:${PORT}`);
 });
