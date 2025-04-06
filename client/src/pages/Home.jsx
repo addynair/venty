@@ -6,7 +6,7 @@ const Home = () => {
   const [entry, setEntry] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-
+  const baseUrl = process.env.REACT_APP_BACKEND_URL;
   const handleAnalyze = async () => {
     if (!entry.trim()) return;
 
