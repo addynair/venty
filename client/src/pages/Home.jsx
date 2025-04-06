@@ -12,7 +12,7 @@ const Home = () => {
 
     setLoading(true);
     try {
-      const response = await axios.post("http://localhost:5000/analyze", { entry });
+      const response = await axios.post(`${baseUrl}/analyze`, { entry });
       navigate("/results", { state: response.data });
     } catch (error) {
       console.error("❌ Error analyzing mood:", error);
