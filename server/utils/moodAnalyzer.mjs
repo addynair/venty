@@ -19,11 +19,12 @@ ENTRY:
 """${entry}"""
 `;
 
-  const result = await model.generateContent(prompt);
-  const text = await result.response.text(); 
-  console.log("🧠 Gemini raw response:", text);
-
   try {
+    const result = await model.generateContent(prompt);
+    const text = await result.response.text();
+    console.log("🧠 Gemini raw response:", text);
+
+    // Try to extract JSON
     const jsonStart = text.indexOf("{");
     const jsonEnd = text.lastIndexOf("}") + 1;
     const jsonString = text.slice(jsonStart, jsonEnd);
@@ -31,7 +32,16 @@ ENTRY:
     const parsed = JSON.parse(jsonString);
     return parsed;
   } catch (err) {
-    console.error("❌ Failed to parse Gemini response:", err);
+    if (err.status === 429) {
+      console.error("🚫 Gemini API rate limit hit:", err.message);
+      return {
+        sentiment: "API quota exceeded",
+        summary: "Try again after your daily quota resets.",
+        suggestion: "Pause and reflect offline for now.",
+      };
+    }
+
+    console.error("❌ Failed to analyze mood:", err);
     return {
       sentiment: "Not available",
       summary: "Not available",
