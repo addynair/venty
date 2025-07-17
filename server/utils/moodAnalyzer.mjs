@@ -1,51 +1,58 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import fetch from "node-fetch";
 import dotenv from "dotenv";
 dotenv.config();
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const HF_API_URL =
+  "https://api-inference.huggingface.co/models/j-hartmann/emotion-english-distilroberta-base";
 
 export default async function analyzeMood(entry) {
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
-
-  const prompt = `
-You are a helpful AI that analyzes daily journal entries. Return a JSON response like:
-{
-  "sentiment": "Positive/Negative/Neutral",
-  "summary": "Two-sentence summary of the user's day.",
-  "suggestion": "Helpful mental health suggestion."
-}
-
-ENTRY:
-"""${entry}"""
-`;
-
   try {
-    const result = await model.generateContent(prompt);
-    const text = await result.response.text();
-    console.log("🧠 Gemini raw response:", text);
+    const response = await fetch(HF_API_URL, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${process.env.HF_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ inputs: entry }),
+    });
 
-    // Try to extract JSON
-    const jsonStart = text.indexOf("{");
-    const jsonEnd = text.lastIndexOf("}") + 1;
-    const jsonString = text.slice(jsonStart, jsonEnd);
+    const data = await response.json();
 
-    const parsed = JSON.parse(jsonString);
-    return parsed;
+    // Get the emotion with highest score
+    const top = data[0].reduce(
+      (max, curr) => (curr.score > max.score ? curr : max),
+      data[0]
+    );
+
+    return {
+      sentiment: top.label,
+      summary: "You shared a reflection related to " + top.label.toLowerCase(),
+      suggestion: getSuggestion(top.label),
+    };
   } catch (err) {
-    if (err.status === 429) {
-      console.error("🚫 Gemini API rate limit hit:", err.message);
-      return {
-        sentiment: "API quota exceeded",
-        summary: "Try again after your daily quota resets.",
-        suggestion: "Pause and reflect offline for now.",
-      };
-    }
-
-    console.error("❌ Failed to analyze mood:", err);
+    console.error("❌ Hugging Face API error:", err);
     return {
       sentiment: "Not available",
-      summary: "Not available",
-      suggestion: "Not available",
+      summary: "Something went wrong.",
+      suggestion: "Please try again later.",
     };
   }
+}
+
+function getSuggestion(label) {
+  const suggestions = {
+    joy: "Celebrate your good moments! Share them with someone you love.",
+    sadness: "Try writing about what made you sad or take a short walk.",
+    anger: "Take deep breaths or journal your thoughts to release tension.",
+    fear: "Remind yourself that it's okay to be scared. Grounding exercises can help.",
+    surprise: "Reflect on what surprised you — was it positive or negative?",
+    disgust:
+      "Try to distance yourself mentally and reflect later with clarity.",
+    neutral: "Keep observing and journaling. It's okay to feel steady.",
+  };
+
+  return (
+    suggestions[label.toLowerCase()] ||
+    "Take a moment to reflect on this emotion."
+  );
 }
