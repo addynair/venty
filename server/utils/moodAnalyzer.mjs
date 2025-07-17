@@ -18,16 +18,23 @@ export default async function analyzeMood(entry) {
 
     const data = await response.json();
 
-    // Get the emotion with highest score
+    console.log("📦 Hugging Face response:", JSON.stringify(data));
+
+    if (!Array.isArray(data) || !Array.isArray(data[0])) {
+      throw new Error("Invalid response format from Hugging Face");
+    }
+
     const top = data[0].reduce(
       (max, curr) => (curr.score > max.score ? curr : max),
-      data[0]
+      data[0][0]
     );
 
+    const label = top.label || "Unknown";
+
     return {
-      sentiment: top.label,
-      summary: "You shared a reflection related to " + top.label.toLowerCase(),
-      suggestion: getSuggestion(top.label),
+      sentiment: label,
+      summary: "You shared a reflection related to " + label.toLowerCase(),
+      suggestion: getSuggestion(label),
     };
   } catch (err) {
     console.error("❌ Hugging Face API error:", err);
