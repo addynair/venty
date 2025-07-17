@@ -10,7 +10,7 @@
 
 ## 🧠 Features
 
-- 🤖 AI-powered mood analysis using Gemini API  
+- 🤖 AI-powered mood analysis using Hugging Face API
 - 💬 Thoughtful sentiment summary and gentle suggestions  
 - 🎨 A soothing, cloud-inspired UI built with React & Tailwind CSS  
 - 🚀 Full-stack project with deployed frontend & backend  
@@ -34,6 +34,6 @@
 ### Backend
 - Node.js  
 - Express  
-- Gemini API (by Google)  
+- Hugging Face API
 - LangChain  
 
